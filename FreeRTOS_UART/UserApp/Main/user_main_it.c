@@ -21,8 +21,8 @@ void user_main(void)
     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
     
     xTaskCreate(vTask1, "vTask1", 128, NULL, 1, NULL);
-    xTaskCreate(vTask2, "vTask2", 128, NULL, 2, NULL);
-    xTaskCreate(vTask3, "vTask3", 128, NULL, 2, NULL);
+    xTaskCreate(vTask2, "vTask2", 128, NULL, 1, NULL);
+    xTaskCreate(vTask3, "vTask3", 128, NULL, 1, NULL);
 
     vTaskStartScheduler();
 
@@ -36,6 +36,8 @@ __NO_RETURN void vTask1(void *argument)
     struct UART_Device *pUARTDev = GetUARTDevie("stm32_uart1");
 
     uint8_t c;
+    
+    pUARTDev->Init(pUARTDev, 115200, 'N', 1);
     
     while(1)
     {

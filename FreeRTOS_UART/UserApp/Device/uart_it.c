@@ -15,33 +15,33 @@
 
 struct UART_Data
 {
-    void *uart_handle;
-    SemaphoreHandle_t *xTxSem;
-    QueueHandle_t *xRxQueue;
+    UART_HandleTypeDef *uart_handle;
+    SemaphoreHandle_t xTxSem;
+    QueueHandle_t xRxQueue;
     uint8_t rxdata;
 };
 
-#define get_prvdata(pDev) ((struct UART_Data *)((pDev)->prvdata))
-
-
 static int stm32_uart_init(struct UART_Device *pDev, int baud, char parity, int stop)
 {
-    get_prvdata(pDev)->xTxSem = xSemaphoreCreateBinary();
-    get_prvdata(pDev)->xRxQueue = xQueueCreate(100, 1);
+    struct UART_Data *uart_data = pDev->prvdata;
     
-    // 启动第一次数据接收
-    HAL_UART_Receive_IT(get_prvdata(pDev)->uart_handle, 
-                        &(get_prvdata(pDev)->rxdata), 1);
+    uart_data->xTxSem = xSemaphoreCreateBinary();
+    uart_data->xRxQueue = xQueueCreate(100, 1);
+    
+    // Start the first data reception
+    HAL_UART_Receive_IT(uart_data->uart_handle, &uart_data->rxdata, 1);
     
     return 0;
 }
 
 static int stm32_uart_send(struct UART_Device *pDev, uint8_t *data, int len, int timeout_ms)
 {
-    // 触发中断发送数据
+    struct UART_Data *uart_data = pDev->prvdata;
+    
+    // Trigger interrupt to send data
     HAL_UART_Transmit_IT(pDev->prvdata, data, len);
-    // 等待信号量
-    if(pdTRUE != xSemaphoreTake(*(get_prvdata(pDev)->xTxSem), timeout_ms)){
+    
+    if(pdTRUE != xSemaphoreTake(uart_data->xTxSem, timeout_ms)){
         return -1;
     }
     return 0;
@@ -49,13 +49,22 @@ static int stm32_uart_send(struct UART_Device *pDev, uint8_t *data, int len, int
 
 static int stm32_uart_recv(struct UART_Device *pDev, uint8_t *data, int len, int timeout_ms)
 {
-    if (pdPASS != xQueueReceive(*(get_prvdata(pDev)->xRxQueue), data, timeout_ms)) {
+    struct UART_Data *uart_data = pDev->prvdata;
+    
+    if (pdPASS != xQueueReceive(uart_data->xRxQueue, data, timeout_ms)) {
         return -1;
     }
     return 0;
 }
 
-static struct UART_Data stm32_uart1_data = {0};
+
+/***************************************************/
+
+/***************************************************/
+static struct UART_Data stm32_uart1_data = {
+    .uart_handle = &huart1
+};
+
 
 static struct UART_Device stm32_uart1 = {
     .name = "stm32_uart1",
@@ -65,7 +74,7 @@ static struct UART_Device stm32_uart1 = {
     .Recv = stm32_uart_recv
 };
 
-struct UART_Device *stm32_uart_devs[] = {&stm32_uart1, };
+struct UART_Device *stm32_uart_devs[] = {&stm32_uart1};
 
 struct UART_Device *GetUARTDevie(const char *name)
 {
@@ -82,19 +91,22 @@ struct UART_Device *GetUARTDevie(const char *name)
 
 
 /**
- * @brief 发送完成回调函数
+ * @brief Send completion callback function
 */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
+    struct UART_Data *uart_data;
+    
     if (huart == &huart1)
     {
-        // 释放信号量
-        xSemaphoreGiveFromISR(get_prvdata(&stm32_uart1)->xTxSem, NULL);
+        uart_data = (&stm32_uart1)->prvdata;
+        
+        xSemaphoreGiveFromISR(uart_data->xTxSem, NULL);
     }
 }
 
 /**
- * @brief 接收完成回调函数
+ * @brief Receive completion callback function
 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -102,11 +114,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
     if (huart == &huart1)
     {
-        uart_data = get_prvdata(&stm32_uart1);
+        uart_data = (&stm32_uart1)->prvdata;
 
-        // 写入队列
-        xQueueSendFromISR(*uart_data->xRxQueue, &(uart_data->rxdata), NULL);
-        // 再次启动数据接收
+        // Write to queue
+        xQueueSendFromISR(uart_data->xRxQueue, &(uart_data->rxdata), NULL);
+        // Restart data reception
         HAL_UART_Receive_IT(&huart1, &(uart_data->rxdata), 1);
     }
 }
