@@ -39,20 +39,24 @@ static int stm32_uart_recv(struct UART_Device *pDev, uint8_t *data, int timeout_
 /*********************************
  * Global Variables
  *********************************/
-static struct UART_Data stm32_uart1_data = {
+
+static struct UART_Device *g_cur_uart1_dev;
+
+static struct UART_Data __stm32_uart1_data = {
     .uart_handle = &huart1
 };
 
-
 static struct UART_Device stm32_uart1 = {
     .name = "stm32_uart1",
-    .prvdata = &stm32_uart1_data,
+    .prvdata = &__stm32_uart1_data,
     .Init = stm32_uart_init,
     .Send = stm32_uart_send,
     .Recv = stm32_uart_recv
 };
 
-static struct UART_Device *stm32_uart_devs[] = {&stm32_uart1};
+static struct UART_Device *stm32_uart_devs[] = {
+    &stm32_uart1, 
+};
 
 /*********************************
  * External Function Implementations
@@ -97,6 +101,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 static int stm32_uart_init(struct UART_Device *pDev, int baud, char parity, int stop)
 {
     struct UART_Data *uart_data = pDev->prvdata;
+    
+    g_cur_uart1_dev = pDev;
     
     uart_data->xTxSem = xSemaphoreCreateBinary();
     uart_data->xRxQueue = xQueueCreate(100, 1);
