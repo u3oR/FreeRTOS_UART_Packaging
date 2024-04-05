@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "arm_math.h"
 #include "main.h"
 #include "usart.h"
 
