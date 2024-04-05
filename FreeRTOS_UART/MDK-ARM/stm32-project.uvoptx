@@ -347,7 +347,7 @@
       <OPTFL>
         <tvExp>1</tvExp>
         <tvExpOptDlg>0</tvExpOptDlg>
-        <IsCurrentTarget>1</IsCurrentTarget>
+        <IsCurrentTarget>0</IsCurrentTarget>
       </OPTFL>
       <CpuCode>18</CpuCode>
       <DebugOpt>
@@ -619,7 +619,7 @@
       <OPTFL>
         <tvExp>1</tvExp>
         <tvExpOptDlg>0</tvExpOptDlg>
-        <IsCurrentTarget>0</IsCurrentTarget>
+        <IsCurrentTarget>1</IsCurrentTarget>
       </OPTFL>
       <CpuCode>18</CpuCode>
       <DebugOpt>
@@ -1147,7 +1147,7 @@
 
   <Group>
     <GroupName>FreeRTOS/Source</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1302,8 +1302,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\UserApp\Device\uart_it.c</PathWithFileName>
-      <FilenameWithoutPath>uart_it.c</FilenameWithoutPath>
+      <PathWithFileName>..\UserApp\Device\device_uart_it.c</PathWithFileName>
+      <FilenameWithoutPath>device_uart_it.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1314,8 +1314,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\UserApp\Device\uart_dma.c</PathWithFileName>
-      <FilenameWithoutPath>uart_dma.c</FilenameWithoutPath>
+      <PathWithFileName>..\UserApp\Device\device_uart_dma.c</PathWithFileName>
+      <FilenameWithoutPath>device_uart_dma.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

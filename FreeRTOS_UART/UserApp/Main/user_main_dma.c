@@ -9,9 +9,11 @@
 #include "task.h"
 #include "arm_math.h"
 
+#include "device_uart.h"
 
 void vTask1(void *argument);
 void vTask2(void *argument);
+void vTask3(void *argument);
 
 void user_main(void)
 {
@@ -20,13 +22,40 @@ void user_main(void)
     
     xTaskCreate(vTask1, "vTask1", 128, NULL, 1, NULL);
     xTaskCreate(vTask2, "vTask2", 128, NULL, 1, NULL);
+    xTaskCreate(vTask3, "vTask3", 128, NULL, 1, NULL);
 
     vTaskStartScheduler();
-    
-	Error_Handler();
+
+    Error_Handler();
 }
 
 __NO_RETURN void vTask1(void *argument)
+{
+    (void)argument;
+
+    struct UART_Device *pUARTDev = DEV_UART_GetDevice("stm32_uart1");
+
+    uint8_t c;
+    
+    pUARTDev->Init(pUARTDev, 115200, 'N', 1);
+    
+    while(1)
+    {
+        
+        pUARTDev->Send(pUARTDev, (uint8_t *)"test ok\n", 8, 100);
+
+        while (0 != pUARTDev->Recv(pUARTDev, &c, 1));
+        
+        c += 1;
+
+        pUARTDev->Send(pUARTDev, &c, 1, 1);
+
+    }
+}
+
+
+
+__NO_RETURN void vTask2(void *argument)
 {
 	(void)argument;
     
@@ -36,7 +65,8 @@ __NO_RETURN void vTask1(void *argument)
     }
 }
 
-__NO_RETURN void vTask2(void *argument)
+
+__NO_RETURN void vTask3(void *argument)
 {
 	(void)argument;
     
@@ -45,5 +75,4 @@ __NO_RETURN void vTask2(void *argument)
         vTaskDelay(500);
     }
 }
-
 

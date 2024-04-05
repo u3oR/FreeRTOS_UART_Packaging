@@ -9,7 +9,7 @@
 #include "task.h"
 #include "arm_math.h"
 
-#include "uart_it.h"
+#include "device_uart.h"
 
 void vTask1(void *argument);
 void vTask2(void *argument);
@@ -33,7 +33,7 @@ __NO_RETURN void vTask1(void *argument)
 {
     (void)argument;
 
-    struct UART_Device *pUARTDev = GetUARTDevie("stm32_uart1");
+    struct UART_Device *pUARTDev = DEV_UART_GetDevice("stm32_uart1");
 
     uint8_t c;
     
@@ -44,7 +44,7 @@ __NO_RETURN void vTask1(void *argument)
         
         pUARTDev->Send(pUARTDev, (uint8_t *)"test ok\n", 8, 100);
 
-        while (0 != pUARTDev->Recv(pUARTDev, &c, 1, 100));
+        while (0 != pUARTDev->Recv(pUARTDev, &c, 1));
         
         c += 1;
 
